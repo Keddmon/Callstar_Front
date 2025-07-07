@@ -1,0 +1,38 @@
+.main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+
+    margin-top: 20px;
+}
+
+.main-container h1, h2 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.main-container h1, h2, p {
+    text-align: center;
+}
+
+.main-container h1 {
+    font-size: 25px;
+}
+
+.main-container h2 {
+    font-size: 20px;
+}
+
+.main-container p {
+    font-size: 18px;
+}
+
+.main-container ul {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MainPresenter from "./MainPresenter";
 import { io } from "socket.io-client";
+import CID_DATA_TYPE from "../../../../utils/Protocol.constants";
 
 const socket = io('http://localhost:5000');
 
@@ -9,28 +10,60 @@ const MainContainer = () => {
     /* ===== STATE ===== */
     const [connectionStatus, setConnectionStatus] = useState(false);
     const [callerId, setCallerId] = useState('');
+    const [deviceId, setDeviceId] = useState({});
     const [callEvents, setCallEvents] = useState([]);
+
+
 
     /* ===== HOOK ===== */
     useEffect(() => {
         fetch('http://localhost:5000/api/connection-status').
             then(res => res.json()).
-            then(data => setConnectionStatus(data.status === 'connected' ? '연결 성공' : '연결 실패'));
-    }, []);
+            then(data => setConnectionStatus(data.status === 'connected' ? 'connected' : 'disconnected'));
+    }, [], [connectionStatus]);
+
+
 
     useEffect(() => {
         socket.on('cid-data', (data) => {
-            if (data.type === 'incoming') {
-                setCallerId(data.phoneNumber);
-                setCallEvents(prevEvents => [...prevEvents, `발신 전화번호: ${data.phoneNumber}`]);
-            } else if (data.type === 'forced-end') {
-                setCallEvents(prevEvents => [...prevEvents, '전화 끊김']);
-            } else if (data.type === 'off-hook') {
-                setCallEvents(prevEvents => [...prevEvents, '수화기 듬']);
-            } else if (data.type === 'on-hook') {
-                setCallEvents(prevEvents => [...prevEvents, '수화기 놔둠']);
-            } else if (data.type === 'P') {
-                setCallEvents(prevEvents => [...prevEvents, '기기 확인']);
+            switch (data.type) {
+                case CID_DATA_TYPE.DEVICE_INFO_REQ:
+                    setCallEvents(prevEvents => [...prevEvents, '(PC → 장치) 장치 정보 요청']);
+                    break;
+
+                case CID_DATA_TYPE.DEVICE_INFO_RES:
+                    setDeviceId(data.info);
+                    setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 장치 정보 응답: ${data.info}`]);
+                    break;
+
+                case CID_DATA_TYPE.INCOMING:
+                    setCallerId(data.phoneNumber);
+                    setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 수신: ${data.phoneNumber}`]);
+                    break;
+
+                case CID_DATA_TYPE.MASKED:
+                    setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 수신: 알 수 없는 번호 (${data.payload})`]);
+                    break;
+
+                case CID_DATA_TYPE.DIAL_OUT:
+                    setCallerId(data.phoneNumber);
+                    setCallEvents(prevEvents => [...prevEvents, `(PC → 장치) 발신: ${data.phoneNumber}`]);
+                    break;
+
+                case CID_DATA_TYPE.DIAL_COMPLETE:
+                    setCallEvents(prevEvents => [...prevEvents, '(장치 → PC) 발신 완료']);
+                    break;
+
+                case CID_DATA_TYPE.FORCED_END:
+                    setCallEvents(prevEvents => [...prevEvents, '(PC → 장치) 강제 종료']);
+                    break;
+
+                case CID_DATA_TYPE.OFF_HOOK:
+                    setCallEvents(prevEvents => [...prevEvents, '(장치 → PC) 수화기 들음']);
+                    break;
+
+                case CID_DATA_TYPE.ON_HOOK:
+                    setCallEvents(prevEvents => [...prevEvents, '(장치 → PC) 수화기 내려놓음'])
             }
         });
 
@@ -38,10 +71,11 @@ const MainContainer = () => {
             socket.off('cid-data');
         };
 
-    }, []);
+    }, [], [callerId, callEvents]);
 
     return (
         <MainPresenter
+            deviceId={deviceId}
             connectionStatus={connectionStatus}
             callerId={callerId}
             callEvents={callEvents}
