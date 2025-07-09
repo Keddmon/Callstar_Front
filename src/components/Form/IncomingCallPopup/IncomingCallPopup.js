@@ -25,6 +25,7 @@ const IncomingCallPopup = ({
     type,
     phoneNumber = '',
     reason = '',
+    onClose,
 }) => {
     const [show, setShow] = useState(visible);
 
@@ -37,7 +38,7 @@ const IncomingCallPopup = ({
             <div className='popup-content'>
                 <h2>상담 요청</h2>
                 <p>{getMessageByType(type, phoneNumber, reason)}</p>
-                <button onClick={() => setShow(false)}>닫기</button>
+                <button onClick={onClose}>닫기</button>
             </div>
         </div>
     ) : null;
