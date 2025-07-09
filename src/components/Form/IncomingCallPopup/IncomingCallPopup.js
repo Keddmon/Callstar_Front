@@ -38,7 +38,20 @@ const IncomingCallPopup = ({
             <div className='popup-content'>
                 <h2>상담 요청</h2>
                 <p>{getMessageByType(type, phoneNumber, reason)}</p>
-                <button onClick={onClose}>닫기</button>
+                <div class='popup-button-wrap'>
+                    <button
+                        style={{
+                            width: '100%'
+                        }}
+                        onClick={onClose}>등록</button>
+                    <button
+                        style={{
+                            width: '100%',
+                            backgroundColor: 'red'
+                        }}
+                        onClick={onClose}
+                    >거절</button>
+                </div>
             </div>
         </div>
     ) : null;

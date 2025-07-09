@@ -18,6 +18,14 @@
     margin-top: 0;
 }
 
+.popup-content .popup-button-wrap {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
 .popup-content button {
     margin-top: 15px;
     padding: 6px 12px;
