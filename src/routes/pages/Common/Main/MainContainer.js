@@ -13,6 +13,14 @@ const MainContainer = () => {
     const [deviceId, setDeviceId] = useState({});
     const [callEvents, setCallEvents] = useState([]);
 
+    // 팝업 테스트
+    const [popupInfo, setPopupInfo] = useState({
+        visible: false,
+        type: null,
+        phoneNumber: '',
+        reason: '',
+    });
+
 
 
     /* ===== HOOK ===== */
@@ -39,6 +47,12 @@ const MainContainer = () => {
                 case CID_DATA_TYPE.INCOMING:
                     setCallerId(data.phoneNumber);
                     setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 수신: ${data.phoneNumber}`]);
+                    setPopupInfo({
+                        visible: true,
+                        type: CID_DATA_TYPE.INCOMING,
+                        phoneNumber: data.phoneNumber,
+                        reason: '',
+                    })
                     break;
 
                 case CID_DATA_TYPE.MASKED:
@@ -48,6 +62,12 @@ const MainContainer = () => {
                 case CID_DATA_TYPE.DIAL_OUT:
                     setCallerId(data.phoneNumber);
                     setCallEvents(prevEvents => [...prevEvents, `(PC → 장치) 발신: ${data.phoneNumber}`]);
+                    setPopupInfo({
+                        visible: true,
+                        type: CID_DATA_TYPE.DIAL_OUT,
+                        phoneNumber: data.phoneNumber,
+                        reason: '',
+                    })
                     break;
 
                 case CID_DATA_TYPE.DIAL_COMPLETE:
@@ -79,6 +99,9 @@ const MainContainer = () => {
             connectionStatus={connectionStatus}
             callerId={callerId}
             callEvents={callEvents}
+
+            popupInfo={popupInfo}
+            setPopupInfo={setPopupInfo}
         />
     );
 }

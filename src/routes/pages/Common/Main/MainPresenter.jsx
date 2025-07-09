@@ -1,9 +1,13 @@
+import { IncomingCallPopup } from '../../../../components';
 import './Main.css';
 
 const MainPresenter = ({
     connectionStatus,
     callerId,
     callEvents,
+
+    popupInfo,
+    setPopupInfo,
 }) => {
 
     /* ===== RENDER ===== */
@@ -27,6 +31,14 @@ const MainPresenter = ({
                     ))}
                 </ul>
             </div>
+
+            <IncomingCallPopup
+                visible={popupInfo.visible}
+                type={popupInfo.type}
+                phoneNumber={popupInfo.phoneNumber}
+                reason={popupInfo.reason}
+                onClose={() => setPopupInfo({ visible: false, type: null, phoneNumber: '', reason: ''})}
+            />
         </div>
     );
 }
