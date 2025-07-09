@@ -37,7 +37,7 @@ const MainPresenter = ({
                 type={popupInfo.type}
                 phoneNumber={popupInfo.phoneNumber}
                 reason={popupInfo.reason}
-                onClose={() => setPopupInfo({ visible: false, type: null, phoneNumber: '', reason: ''})}
+                onClose={() => setPopupInfo({ visible: false, type: null, phoneNumber: '', reason: '' })}
             />
         </div>
     );
