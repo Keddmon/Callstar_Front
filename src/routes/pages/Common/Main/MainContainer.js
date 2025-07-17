@@ -17,7 +17,7 @@ const MainContainer = () => {
     const [popupInfo, setPopupInfo] = useState({
         visible: false,
         type: null,
-        phoneNumber: '',
+        data: '',
         reason: '',
     });
 
@@ -31,17 +31,40 @@ const MainContainer = () => {
     }, [], [connectionStatus]);
 
 
+    useEffect(() => {
+        console.log('[SOCKET] Connecting...');
+        socket.on('connect', () => {
+            console.log('[SOCKET] Connected to server:', socket.id);
+        });
+
+        socket.on('cid-data', (data) => {
+            console.log('[SOCKET] Received cid-data:', data);
+        });
+    }, []);
+
 
     useEffect(() => {
         socket.on('cid-data', (data) => {
+
+            console.log('CID-DATA: ', data);
+
             switch (data.type) {
                 case CID_DATA_TYPE.DEVICE_INFO_REQ:
+                    setDeviceId(data.info);
+                    console.log(deviceId);
                     setCallEvents(prevEvents => [...prevEvents, '(PC → 장치) 장치 정보 요청']);
                     break;
 
                 case CID_DATA_TYPE.DEVICE_INFO_RES:
                     setDeviceId(data.info);
+                    console.log(deviceId);
                     setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 장치 정보 응답: ${data.info}`]);
+                    setPopupInfo({
+                        visible: true,
+                        type: CID_DATA_TYPE.DEVICE_INFO_RES,
+                        data: data.info,
+                        reason: '',
+                    });
                     break;
 
                 case CID_DATA_TYPE.INCOMING:
@@ -50,9 +73,9 @@ const MainContainer = () => {
                     setPopupInfo({
                         visible: true,
                         type: CID_DATA_TYPE.INCOMING,
-                        phoneNumber: data.phoneNumber,
+                        data: data.phoneNumber,
                         reason: '',
-                    })
+                    });
                     break;
 
                 case CID_DATA_TYPE.MASKED:
@@ -65,13 +88,19 @@ const MainContainer = () => {
                     setPopupInfo({
                         visible: true,
                         type: CID_DATA_TYPE.DIAL_OUT,
-                        phoneNumber: data.phoneNumber,
+                        data: data.phoneNumber,
                         reason: '',
                     })
                     break;
 
                 case CID_DATA_TYPE.DIAL_COMPLETE:
                     setCallEvents(prevEvents => [...prevEvents, '(장치 → PC) 발신 완료']);
+                    setPopupInfo({
+                        visible: true,
+                        type: CID_DATA_TYPE.DIAL_COMPLETE,
+                        data: data.phoneNumber,
+                        reason: '',
+                    })
                     break;
 
                 case CID_DATA_TYPE.FORCED_END:
@@ -91,7 +120,7 @@ const MainContainer = () => {
             socket.off('cid-data');
         };
 
-    }, [], [callerId, callEvents]);
+    }, []);
 
     return (
         <MainPresenter
