@@ -1,127 +1,168 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MainPresenter from "./MainPresenter";
 import { io } from "socket.io-client";
 import CID_DATA_TYPE from "../../../../utils/Protocol.constants";
 
-const socket = io('http://localhost:5000');
-
 const MainContainer = () => {
 
     /* ===== STATE ===== */
+    const socketRef = useRef(null);
+    // 연결 상태
     const [connectionStatus, setConnectionStatus] = useState(false);
+    // 전화번호
     const [callerId, setCallerId] = useState('');
-    const [deviceId, setDeviceId] = useState({});
+    // 장비 정보
+    const [deviceId, setDeviceId] = useState([]);
+    // 콜 이벤트
     const [callEvents, setCallEvents] = useState([]);
-
-    // 팝업 테스트
+    // 팝업 테스트 (콜 이벤트)
     const [popupInfo, setPopupInfo] = useState({
         visible: false,
         type: null,
         data: '',
         reason: '',
     });
+    // 연결 가능한 장비 목록
+    const [availablePorts, setAvailablePorts] = useState([]);
 
 
 
-    /* ===== HOOK ===== */
+    /* ===== HOOKS ===== */
     useEffect(() => {
-        fetch('http://localhost:5000/api/connection-status').
-            then(res => res.json()).
-            then(data => setConnectionStatus(data.status === 'connected' ? 'connected' : 'disconnected'));
-    }, [], [connectionStatus]);
+        if (!socketRef.current) {
+            const socket = io('http://localhost:5000', { transports: ['websocket'] });
+            socketRef.current = socket;
 
+            socket.on('connect', () => {
+                console.log('[SOCKET] Connected to server:', socket.id);
+                socket.emit('client-ready');
+            });
 
-    useEffect(() => {
-        console.log('[SOCKET] Connecting...');
-        socket.on('connect', () => {
-            console.log('[SOCKET] Connected to server:', socket.id);
-        });
+            socket.on('cid-data', (data) => {
+                console.log('[SOCKET] Received cid-data:', data);
 
-        socket.on('cid-data', (data) => {
-            console.log('[SOCKET] Received cid-data:', data);
-        });
-    }, []);
+                switch (data.type) {
+                    case CID_DATA_TYPE.DEVICE_INFO_REQ:
+                        setDeviceId(data.info);
+                        setCallEvents(prev => [...prev, '(PC → 장치) 장치 정보 요청']);
+                        break;
 
+                    case CID_DATA_TYPE.DEVICE_INFO_RES:
+                        setDeviceId(data.info);
+                        setCallEvents(prev => [...prev, `(장치 → PC) 장치 정보 응답: ${data.info}`]);
+                        // setPopupInfo({
+                        //     visible: true,
+                        //     type: CID_DATA_TYPE.DEVICE_INFO_RES,
+                        //     data: data.info,
+                        //     reason: '',
+                        // });
+                        break;
 
-    useEffect(() => {
-        socket.on('cid-data', (data) => {
+                    case CID_DATA_TYPE.INCOMING:
+                        setCallerId(data.phoneNumber);
+                        setCallEvents(prev => [...prev, `(장치 → PC) 수신: ${data.phoneNumber}`]);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.INCOMING,
+                            data: data.phoneNumber,
+                            reason: '',
+                        });
+                        break;
 
-            console.log('CID-DATA: ', data);
+                    case CID_DATA_TYPE.MASKED:
+                        setCallEvents(prev => [...prev, `(장치 → PC) 수신: 알 수 없는 번호 (${data.payload})`]);
+                        break;
 
-            switch (data.type) {
-                case CID_DATA_TYPE.DEVICE_INFO_REQ:
-                    setDeviceId(data.info);
-                    console.log(deviceId);
-                    setCallEvents(prevEvents => [...prevEvents, '(PC → 장치) 장치 정보 요청']);
-                    break;
+                    case CID_DATA_TYPE.DIAL_OUT:
+                        setCallerId(data.phoneNumber);
+                        setCallEvents(prev => [...prev, `(PC → 장치) 발신: ${data.phoneNumber}`]);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.DIAL_OUT,
+                            data: data.phoneNumber,
+                            reason: '',
+                        });
+                        break;
 
-                case CID_DATA_TYPE.DEVICE_INFO_RES:
-                    setDeviceId(data.info);
-                    console.log(deviceId);
-                    setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 장치 정보 응답: ${data.info}`]);
-                    setPopupInfo({
-                        visible: true,
-                        type: CID_DATA_TYPE.DEVICE_INFO_RES,
-                        data: data.info,
-                        reason: '',
-                    });
-                    break;
+                    case CID_DATA_TYPE.DIAL_COMPLETE:
+                        setCallerId(data.phoneNumber);
+                        setCallEvents(prev => [...prev, '(장치 → PC) 발신 완료']);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.DIAL_COMPLETE,
+                            data: data.phoneNumber,
+                            reason: '',
+                        });
+                        break;
 
-                case CID_DATA_TYPE.INCOMING:
-                    setCallerId(data.phoneNumber);
-                    setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 수신: ${data.phoneNumber}`]);
-                    setPopupInfo({
-                        visible: true,
-                        type: CID_DATA_TYPE.INCOMING,
-                        data: data.phoneNumber,
-                        reason: '',
-                    });
-                    break;
+                    case CID_DATA_TYPE.FORCED_END:
+                        setCallEvents(prev => [...prev, '(PC → 장치) 강제 종료']);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.FORCED_END,
+                            data: '',
+                            reason: '',
+                        });
+                        break;
 
-                case CID_DATA_TYPE.MASKED:
-                    setCallEvents(prevEvents => [...prevEvents, `(장치 → PC) 수신: 알 수 없는 번호 (${data.payload})`]);
-                    break;
+                    case CID_DATA_TYPE.OFF_HOOK:
+                        setCallEvents(prev => [...prev, '(장치 → PC) 수화기 들음']);
+                        break;
 
-                case CID_DATA_TYPE.DIAL_OUT:
-                    setCallerId(data.phoneNumber);
-                    setCallEvents(prevEvents => [...prevEvents, `(PC → 장치) 발신: ${data.phoneNumber}`]);
-                    setPopupInfo({
-                        visible: true,
-                        type: CID_DATA_TYPE.DIAL_OUT,
-                        data: data.phoneNumber,
-                        reason: '',
-                    })
-                    break;
-
-                case CID_DATA_TYPE.DIAL_COMPLETE:
-                    setCallEvents(prevEvents => [...prevEvents, '(장치 → PC) 발신 완료']);
-                    setPopupInfo({
-                        visible: true,
-                        type: CID_DATA_TYPE.DIAL_COMPLETE,
-                        data: data.phoneNumber,
-                        reason: '',
-                    })
-                    break;
-
-                case CID_DATA_TYPE.FORCED_END:
-                    setCallEvents(prevEvents => [...prevEvents, '(PC → 장치) 강제 종료']);
-                    break;
-
-                case CID_DATA_TYPE.OFF_HOOK:
-                    setCallEvents(prevEvents => [...prevEvents, '(장치 → PC) 수화기 들음']);
-                    break;
-
-                case CID_DATA_TYPE.ON_HOOK:
-                    setCallEvents(prevEvents => [...prevEvents, '(장치 → PC) 수화기 내려놓음'])
-            }
-        });
+                    case CID_DATA_TYPE.ON_HOOK:
+                        setCallEvents(prev => [...prev, '(장치 → PC) 수화기 내려놓음']);
+                        break;
+                }
+            });
+        }
 
         return () => {
-            socket.off('cid-data');
+            if (socketRef.current) {
+                console.log('[SOCKET] Disconnecting socket');
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
         };
-
     }, []);
 
+
+
+    // 연결 확인
+    useEffect(() => {
+        fetch('http://localhost:5000/api/connection-status')
+            .then(res => res.json())
+            .then(data => setConnectionStatus(data.status === 'connected' ? 'connected' : 'disconnected'));
+    }, []);
+
+
+
+    // 연결 가능한 장비 확인
+    useEffect(() => {
+        fetch('http://localhost:5000/api/ports')
+            .then(res => res.json())
+            .then(data => {
+                setAvailablePorts(data.ports);
+                console.log(data.ports)
+            });
+    }, []);
+
+
+
+    // 장비 변경 확인
+    useEffect(() => {
+        console.log('[STATE] deviceId changed:', deviceId);
+    }, [deviceId]);
+
+
+
+    /* ===== FUNCTION ===== */
+    const handlePortSelect = (port) => {
+        socketRef.current.emit('select-port', port);
+    };
+
+
+
+    /* ===== RENDER ===== */
     return (
         <MainPresenter
             deviceId={deviceId}
@@ -131,6 +172,9 @@ const MainContainer = () => {
 
             popupInfo={popupInfo}
             setPopupInfo={setPopupInfo}
+
+            availablePorts={availablePorts}
+            handlePortSelect={handlePortSelect}
         />
     );
 }

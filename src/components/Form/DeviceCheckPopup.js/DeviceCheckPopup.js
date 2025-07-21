@@ -1,51 +1,27 @@
-import './IncomingCallPopup.style.css';
+import './DeviceCheckPopup.style.css';
 import CID_DATA_TYPE from '../../../utils/Protocol.constants';
 import { useEffect, useState } from 'react';
 
-/**
- * CID 데이터 타입 구분 함수
- * --
- */
-const getMessageByType = (type, data, reason) => {
-    switch (type) {
-        case CID_DATA_TYPE.DEVICE_INFO_RES:
-            return `기기 확인 응답: ${data}`
-            
-        case CID_DATA_TYPE.INCOMING:
-            return `수신 전화번호: ${data}`;
-
-        case CID_DATA_TYPE.DIAL_OUT:
-            return `발신 전화번호: ${data}`;
-
-        case CID_DATA_TYPE.DIAL_COMPLETE:
-            return `발신 전화번호: ${data}`;
-
-        case CID_DATA_TYPE.FORCED_END:
-            return '강제 종료';
-
-        default:
-            return '알 수 없는 전화 상태';
-    }
-}
-
-
-const IncomingCallPopup = ({
+const DeviceCheckPopup = ({
     visible,
     type,
-    data = '',
-    reason = '',
+    data,
     onClose,
 }) => {
+
+    /* ===== STATE ===== */
     const [show, setShow] = useState(visible);
 
+    /* ===== HOOKS ===== */
     useEffect(() => {
         setShow(visible);
-    }, [visible])
+    }, [visible]);
 
+    /* ===== RENDER ===== */
     return show ? (
         <div className='incoming-call-popup'>
             <div className='popup-content'>
-                <h2>상담 요청</h2>
+                <h2>장비 목록</h2>
                 <p>{getMessageByType(type, data, reason)}</p>
                 <div class='popup-button-wrap'>
                     <button
@@ -64,6 +40,6 @@ const IncomingCallPopup = ({
             </div>
         </div>
     ) : null;
-}
+};
 
-export default IncomingCallPopup;
+export default DeviceCheckPopup;
