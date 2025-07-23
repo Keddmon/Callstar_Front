@@ -1,3 +1,4 @@
 export {
-    IncomingCallPopup
+    IncomingCallPopup,
+    DeviceCheckPopup,
 } from './Form';

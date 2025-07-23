@@ -1,12 +1,13 @@
 import './DeviceCheckPopup.style.css';
-import CID_DATA_TYPE from '../../../utils/Protocol.constants';
 import { useEffect, useState } from 'react';
 
 const DeviceCheckPopup = ({
     visible,
-    type,
-    data,
-    onClose,
+    ports,
+    onChange,
+
+    selectedPort,
+    setSelectedPort,
 }) => {
 
     /* ===== STATE ===== */
@@ -19,23 +20,22 @@ const DeviceCheckPopup = ({
 
     /* ===== RENDER ===== */
     return show ? (
-        <div className='incoming-call-popup'>
+        <div className='device-check-popup'>
             <div className='popup-content'>
                 <h2>장비 목록</h2>
-                <p>{getMessageByType(type, data, reason)}</p>
+                <div>
+                    <select value={selectedPort} onChange={(e) => onChange(e.target.value)}>
+                        {ports.map((port, idx) => (
+                            <option key={idx} value={port.value}>{port.label}</option>
+                        ))}
+                    </select>
+                </div>
                 <div class='popup-button-wrap'>
                     <button
                         style={{
                             width: '100%'
                         }}
-                        onClick={onClose}>등록</button>
-                    <button
-                        style={{
-                            width: '100%',
-                            backgroundColor: 'red'
-                        }}
-                        onClick={onClose}
-                    >거절</button>
+                        onClick={() => setShow(false)}>선택</button>
                 </div>
             </div>
         </div>

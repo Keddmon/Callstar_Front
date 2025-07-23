@@ -1,4 +1,4 @@
-import { IncomingCallPopup } from '../../../../components';
+import { DeviceCheckPopup, IncomingCallPopup } from '../../../../components';
 import './Main.css';
 
 const MainPresenter = ({
@@ -11,7 +11,9 @@ const MainPresenter = ({
     setPopupInfo,
 
     availablePorts,
-    handlePortSelect,
+    selectedPort,
+    setSelectedPort,
+    onPortSelect,
 }) => {
 
     /* ===== RENDER ===== */
@@ -28,15 +30,18 @@ const MainPresenter = ({
                 <p>{callerId ? callerId : '수신 없음'}</p>
             </div>
             <div>
-                <h2>확인된 장비</h2>
-                <p>{deviceId ? deviceId : '확인된 장비 없음'}</p>
+                <h2>확인된 포트</h2>
             </div>
-            <div>
-                <select onChange={(e) => handlePortSelect(e.target.value)}>
-                    {availablePorts.map((port, idx) => (
-                        <option key={idx} value={port}>{port}</option>
-                    ))}
-                </select>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                }}
+            >
+                {availablePorts.map(port => (
+                    <p>{port.label}</p>
+                ))}
             </div>
             <div>
                 <h2>전화 이벤트</h2>
@@ -53,6 +58,15 @@ const MainPresenter = ({
                 data={popupInfo.data}
                 reason={popupInfo.reason}
                 onClose={() => setPopupInfo({ visible: false, type: null, phoneNumber: '', reason: '' })}
+            />
+
+            <DeviceCheckPopup
+                visible={true}
+                ports={availablePorts}
+                onChange={onPortSelect}
+
+                selectedPort={selectedPort}
+                setSelectedPort={setSelectedPort}
             />
         </div>
     );

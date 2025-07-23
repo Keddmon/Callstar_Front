@@ -24,10 +24,13 @@ const MainContainer = () => {
     });
     // 연결 가능한 장비 목록
     const [availablePorts, setAvailablePorts] = useState([]);
+    // 선택된 포트(port)
+    const [selectedPort, setSelectedPort] = useState(null);
 
 
 
     /* ===== HOOKS ===== */
+    // socket 연결 및 Protocol
     useEffect(() => {
         if (!socketRef.current) {
             const socket = io('http://localhost:5000', { transports: ['websocket'] });
@@ -42,22 +45,21 @@ const MainContainer = () => {
                 console.log('[SOCKET] Received cid-data:', data);
 
                 switch (data.type) {
+
+                    // 장비 ID 확인
                     case CID_DATA_TYPE.DEVICE_INFO_REQ:
-                        setDeviceId(data.info);
+                        // setDeviceId(data.info);
                         setCallEvents(prev => [...prev, '(PC → 장치) 장치 정보 요청']);
                         break;
 
                     case CID_DATA_TYPE.DEVICE_INFO_RES:
-                        setDeviceId(data.info);
+                        // setDeviceId(data.info);
                         setCallEvents(prev => [...prev, `(장치 → PC) 장치 정보 응답: ${data.info}`]);
-                        // setPopupInfo({
-                        //     visible: true,
-                        //     type: CID_DATA_TYPE.DEVICE_INFO_RES,
-                        //     data: data.info,
-                        //     reason: '',
-                        // });
                         break;
 
+
+
+                    // 수신호 처리
                     case CID_DATA_TYPE.INCOMING:
                         setCallerId(data.phoneNumber);
                         setCallEvents(prev => [...prev, `(장치 → PC) 수신: ${data.phoneNumber}`]);
@@ -73,6 +75,9 @@ const MainContainer = () => {
                         setCallEvents(prev => [...prev, `(장치 → PC) 수신: 알 수 없는 번호 (${data.payload})`]);
                         break;
 
+
+
+                    // 발신호 처리    
                     case CID_DATA_TYPE.DIAL_OUT:
                         setCallerId(data.phoneNumber);
                         setCallEvents(prev => [...prev, `(PC → 장치) 발신: ${data.phoneNumber}`]);
@@ -105,12 +110,27 @@ const MainContainer = () => {
                         });
                         break;
 
+
+
+                    // 수화기 처리
                     case CID_DATA_TYPE.OFF_HOOK:
                         setCallEvents(prev => [...prev, '(장치 → PC) 수화기 들음']);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.OFF_HOOK,
+                            data: '',
+                            reason: '',
+                        });
                         break;
 
                     case CID_DATA_TYPE.ON_HOOK:
                         setCallEvents(prev => [...prev, '(장치 → PC) 수화기 내려놓음']);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.ON_HOOK,
+                            data: '',
+                            reason: '',
+                        });
                         break;
                 }
             });
@@ -142,7 +162,6 @@ const MainContainer = () => {
             .then(res => res.json())
             .then(data => {
                 setAvailablePorts(data.ports);
-                console.log(data.ports)
             });
     }, []);
 
@@ -157,8 +176,19 @@ const MainContainer = () => {
 
     /* ===== FUNCTION ===== */
     const handlePortSelect = (port) => {
+        if (!socketRef.current) return;
+
+        if (selectedPort === port) return;
+
+        setSelectedPort(port);
         socketRef.current.emit('select-port', port);
     };
+
+
+
+    console.log('[MainContainer][availablePorts]: ', availablePorts);
+    console.log('[MainContainer][socketRef]: ', socketRef);
+    console.log('[MainContainer][selectedPort]: ', selectedPort);
 
 
 
@@ -174,7 +204,9 @@ const MainContainer = () => {
             setPopupInfo={setPopupInfo}
 
             availablePorts={availablePorts}
-            handlePortSelect={handlePortSelect}
+            selectedPort={selectedPort}
+            setSelectedPort={setSelectedPort}
+            onPortSelect={handlePortSelect}
         />
     );
 }
