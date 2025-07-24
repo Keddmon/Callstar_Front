@@ -2,7 +2,6 @@ import { DeviceCheckPopup, IncomingCallPopup, Sidebar } from '../../../../compon
 import './Main.css';
 
 const MainPresenter = ({
-    deviceId,
     connectionStatus,
     callerId,
     callEvents,
@@ -69,7 +68,6 @@ const MainPresenter = ({
                 onChange={onPortSelect}
 
                 selectedPort={selectedPort}
-                setSelectedPort={setSelectedPort}
             />
             <Sidebar
                 sendCommand={sendCommand}

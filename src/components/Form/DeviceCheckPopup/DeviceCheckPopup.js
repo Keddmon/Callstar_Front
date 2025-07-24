@@ -7,7 +7,6 @@ const DeviceCheckPopup = ({
     onChange,
 
     selectedPort,
-    setSelectedPort,
 }) => {
 
     /* ===== STATE ===== */

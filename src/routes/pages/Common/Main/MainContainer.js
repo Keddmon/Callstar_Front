@@ -11,8 +11,6 @@ const MainContainer = () => {
     const [connectionStatus, setConnectionStatus] = useState(false);
     // 전화번호
     const [callerId, setCallerId] = useState('');
-    // 장비 정보
-    const [deviceId, setDeviceId] = useState([]);
     // 콜 이벤트
     const [callEvents, setCallEvents] = useState([]);
     // 팝업 테스트 (콜 이벤트)
@@ -20,7 +18,6 @@ const MainContainer = () => {
         visible: false,
         type: null,
         data: '',
-        reason: '',
     });
     // 연결 가능한 장비 목록
     const [availablePorts, setAvailablePorts] = useState([]);
@@ -37,23 +34,21 @@ const MainContainer = () => {
             socketRef.current = socket;
 
             socket.on('connect', () => {
-                console.log('[SOCKET] Connected to server:', socket.id);
+                console.log('[SOCKET] 서버 연결:', socket.id);
                 socket.emit('client-ready');
             });
 
             socket.on('cid-data', (data) => {
-                console.log('[SOCKET] Received cid-data:', data);
+                console.log('[SOCKET] cid-data:', data);
 
                 switch (data.type) {
 
                     // 장비 ID 확인
                     case CID_DATA_TYPE.DEVICE_INFO_REQ:
-                        // setDeviceId(data.info);
                         setCallEvents(prev => [...prev, '(PC → 장치) 장치 정보 요청']);
                         break;
 
                     case CID_DATA_TYPE.DEVICE_INFO_RES:
-                        // setDeviceId(data.info);
                         setCallEvents(prev => [...prev, `(장치 → PC) 장치 정보 응답: ${data.info}`]);
                         break;
 
@@ -67,7 +62,7 @@ const MainContainer = () => {
                             visible: true,
                             type: CID_DATA_TYPE.INCOMING,
                             data: data.phoneNumber,
-                            reason: '',
+                
                         });
                         break;
 
@@ -85,7 +80,7 @@ const MainContainer = () => {
                             visible: true,
                             type: CID_DATA_TYPE.DIAL_OUT,
                             data: data.phoneNumber,
-                            reason: '',
+                
                         });
                         break;
 
@@ -96,7 +91,7 @@ const MainContainer = () => {
                             visible: true,
                             type: CID_DATA_TYPE.DIAL_COMPLETE,
                             data: data.phoneNumber,
-                            reason: '',
+                
                         });
                         break;
 
@@ -106,7 +101,7 @@ const MainContainer = () => {
                             visible: true,
                             type: CID_DATA_TYPE.FORCED_END,
                             data: '',
-                            reason: '',
+                
                         });
                         break;
 
@@ -119,7 +114,7 @@ const MainContainer = () => {
                             visible: true,
                             type: CID_DATA_TYPE.OFF_HOOK,
                             data: '',
-                            reason: '',
+                
                         });
                         break;
 
@@ -129,7 +124,7 @@ const MainContainer = () => {
                             visible: true,
                             type: CID_DATA_TYPE.ON_HOOK,
                             data: '',
-                            reason: '',
+                
                         });
                         break;
                 }
@@ -138,7 +133,7 @@ const MainContainer = () => {
 
         return () => {
             if (socketRef.current) {
-                console.log('[SOCKET] Disconnecting socket');
+                console.log('[SOCKET] 소켓 연결 해제');
                 socketRef.current.disconnect();
                 socketRef.current = null;
             }
@@ -167,14 +162,9 @@ const MainContainer = () => {
 
 
 
-    // 장비 변경 확인
-    useEffect(() => {
-        console.log('[STATE] deviceId changed:', deviceId);
-    }, [deviceId]);
-
-
-
     /* ===== FUNCTION ===== */
+
+    // 포트 선택
     const handlePortSelect = (port) => {
         if (!socketRef.current) return;
 
@@ -184,6 +174,7 @@ const MainContainer = () => {
         socketRef.current.emit('select-port', port);
     };
 
+    // 명령어 전송
     const sendCommand = (opcode, payload = '') => {
         socketRef.current?.emit('send-command', {
             channel: '1',
@@ -192,6 +183,7 @@ const MainContainer = () => {
         });
     };
 
+    // 명렁어 시뮬레이트
     const simulateOpcode = (opcode, payload = '') => {
         socketRef.current?.emit('simulate-opcode', {
             opcode,
@@ -201,8 +193,8 @@ const MainContainer = () => {
 
 
 
+    /* ===== CONSOLE ===== */
     console.log('[MainContainer][availablePorts]: ', availablePorts);
-    console.log('[MainContainer][socketRef]: ', socketRef);
     console.log('[MainContainer][selectedPort]: ', selectedPort);
 
 
@@ -210,7 +202,6 @@ const MainContainer = () => {
     /* ===== RENDER ===== */
     return (
         <MainPresenter
-            deviceId={deviceId}
             connectionStatus={connectionStatus}
             callerId={callerId}
             callEvents={callEvents}

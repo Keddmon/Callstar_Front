@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
  * CID 데이터 타입 구분 함수
  * --
  */
-const getMessageByType = (type, data, reason) => {
+const getMessageByType = (type, data) => {
     switch (type) {
         case CID_DATA_TYPE.DEVICE_INFO_RES:
             return {
