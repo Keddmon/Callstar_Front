@@ -33,14 +33,6 @@ const MainPresenter = ({
             </div>
             <div>
                 <h2>확인된 포트</h2>
-            </div>
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                }}
-            >
                 {availablePorts.map(port => (
                     <p>{port.label}</p>
                 ))}
