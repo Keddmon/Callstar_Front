@@ -1,4 +1,4 @@
-import { DeviceCheckPopup, IncomingCallPopup } from '../../../../components';
+import { DeviceCheckPopup, IncomingCallPopup, Sidebar } from '../../../../components';
 import './Main.css';
 
 const MainPresenter = ({
@@ -14,6 +14,9 @@ const MainPresenter = ({
     selectedPort,
     setSelectedPort,
     onPortSelect,
+
+    sendCommand,
+    simulateOpcode,
 }) => {
 
     /* ===== RENDER ===== */
@@ -67,6 +70,10 @@ const MainPresenter = ({
 
                 selectedPort={selectedPort}
                 setSelectedPort={setSelectedPort}
+            />
+            <Sidebar
+                sendCommand={sendCommand}
+                simulateOpcode={simulateOpcode}
             />
         </div>
     );

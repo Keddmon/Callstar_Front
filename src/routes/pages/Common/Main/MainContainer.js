@@ -184,6 +184,21 @@ const MainContainer = () => {
         socketRef.current.emit('select-port', port);
     };
 
+    const sendCommand = (opcode, payload = '') => {
+        socketRef.current?.emit('send-command', {
+            channel: '1',
+            opcode,
+            payload,
+        });
+    };
+
+    const simulateOpcode = (opcode, payload = '') => {
+        socketRef.current?.emit('simulate-opcode', {
+            opcode,
+            payload,
+        });
+    };
+
 
 
     console.log('[MainContainer][availablePorts]: ', availablePorts);
@@ -207,6 +222,9 @@ const MainContainer = () => {
             selectedPort={selectedPort}
             setSelectedPort={setSelectedPort}
             onPortSelect={handlePortSelect}
+
+            sendCommand={sendCommand}
+            simulateOpcode={simulateOpcode}
         />
     );
 }

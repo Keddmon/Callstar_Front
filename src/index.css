@@ -45,12 +45,13 @@ table {
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 body {
-  display: flex;
-  justify-content: center;
+	display: flex;
+	justify-content: center;
 
-  min-height: 100vh;
+	width: 100%;
+	min-height: 100vh;
 }
