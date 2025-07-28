@@ -19,22 +19,24 @@ const DeviceCheckPopup = ({
 
     /* ===== RENDER ===== */
     return show ? (
-        <div className='device-check-popup'>
-            <div className='popup-content'>
-                <h2>장비 목록</h2>
-                <div>
+        <div className="popup-overlay">
+            <div className="device-check-popup">
+                <div className="popup-header">
+                    <h2>장비 선택</h2>
+                    <button className="close-btn" onClick={() => setShow(false)}>✖</button>
+                </div>
+
+                <div className="popup-body">
+                    <label>사용할 포트를 선택하세요:</label>
                     <select value={selectedPort} onChange={(e) => onChange(e.target.value)}>
                         {ports.map((port, idx) => (
                             <option key={idx} value={port.value}>{port.label}</option>
                         ))}
                     </select>
                 </div>
-                <div class='popup-button-wrap'>
-                    <button
-                        style={{
-                            width: '100%'
-                        }}
-                        onClick={() => setShow(false)}>선택</button>
+
+                <div className="popup-footer">
+                    <button className="confirm-btn" onClick={() => setShow(false)}>선택 완료</button>
                 </div>
             </div>
         </div>

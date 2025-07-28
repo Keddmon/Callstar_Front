@@ -15,7 +15,10 @@
 }
 
 .popup-content h2 {
-    margin-top: 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 10px;
 }
 
 .popup-content .popup-button-wrap {

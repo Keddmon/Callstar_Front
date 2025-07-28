@@ -1,38 +1,44 @@
-.main-container {
+.main-layout {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 15px;
-
-    margin-top: 20px;
+    flex-direction: row;
+    gap: 20px;
+    padding: 20px;
 }
 
-.main-container h1, h2 {
-    font-weight: bold;
-    margin-bottom: 10px;
+/* 메인 컨텐츠 */
+.content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
 }
 
-.main-container h1, h2, p {
-    text-align: center;
+/* 카드 스타일 */
+.card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.main-container h1 {
-    font-size: 25px;
-}
+/* 상태 색상 */
+.status-connected { color: green; font-weight: bold; }
+.status-disconnected { color: red; font-weight: bold; }
 
-.main-container h2 {
-    font-size: 20px;
-}
+/* 포트 선택 */
+.port { cursor: pointer; padding: 3px; }
+.port-selected { background: #007bff; color: white; border-radius: 4px; padding: 3px 5px; }
 
-.main-container p {
-    font-size: 18px;
+/* 이벤트 로그 */
+.event-log {
+    max-height: 250px;
+    overflow-y: auto;
 }
-
-.main-container ul {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
+.event-log ul {
+    list-style: none;
+    padding: 0;
+}
+.event-log li {
+    padding: 3px 0;
+    border-bottom: 1px solid #ddd;
 }
