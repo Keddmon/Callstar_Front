@@ -18,6 +18,7 @@ const MainContainer = () => {
         visible: false,
         type: null,
         data: '',
+        reason: '',
     });
     // 연결 가능한 장비 목록
     const [availablePorts, setAvailablePorts] = useState([]);
@@ -66,9 +67,31 @@ const MainContainer = () => {
                         });
                         break;
 
-                    case CID_DATA_TYPE.MASKED:
-                        setCallEvents(prev => [...prev, `(장치 → PC) 수신: 알 수 없는 번호 (${data.payload})`]);
+                    case CID_DATA_TYPE.MASKED_PRIVATE:
+                        setCallEvents(prev => [...prev, `(장치 → PC) 수신: 발신정보표시 금지 (${data.payload})`]);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.MASKED_PRIVATE,
+                            reason: data.reason,
+                        });
                         break;
+
+                    case CID_DATA_TYPE.MASKED_PUBLIC:
+                        setCallEvents(prev => [...prev, `(장치 → PC) 수신: 공중전화 (${data.payload})`]);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.MASKED_PUBLIC,
+                            reason: data.reason,
+                        });
+                        break;
+
+                    case CID_DATA_TYPE.MASKED_UNAVAILABLE:
+                        setCallEvents(prev => [...prev, `(장치 → PC) 수신: 발신번호 수집불가 (${data.payload})`]);
+                        setPopupInfo({
+                            visible: true,
+                            type: CID_DATA_TYPE.MASKED_UNAVAILABLE,
+                            reason: data.reason,
+                        });
 
 
 

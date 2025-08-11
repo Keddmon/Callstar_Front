@@ -5,6 +5,12 @@ const Sidebar = ({
     simulateOpcode,
 }) => {
 
+    /* ===== FUNCTION ===== */
+    const handleCall = () => {
+        sendCommand('S');
+        sendCommand('O', '01020675689');
+    };
+
     /* ===== RENDER ===== */
     return (
         <aside className="sidebar-container">
@@ -15,11 +21,17 @@ const Sidebar = ({
                 <button className="cmd-btn primary" onClick={() => sendCommand('P')}>
                     장비 정보 요청 (P)
                 </button>
-                <button className="cmd-btn primary" onClick={() => sendCommand('O', '01012345678')}>
+                {/* <button className="cmd-btn primary" onClick={() => sendCommand('O', '01020675689')}>
+                    발신 테스트 (O)
+                </button> */}
+                <button className="cmd-btn primary" onClick={handleCall}>
                     발신 테스트 (O)
                 </button>
                 <button className="cmd-btn danger" onClick={() => sendCommand('F')}>
                     발신 강제 종료 (F)
+                </button>
+                <button className='cmd-btn' onClick={() => sendCommand('S')}>
+                    수화기 들기
                 </button>
             </div>
 

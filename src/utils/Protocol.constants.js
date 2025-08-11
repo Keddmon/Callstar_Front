@@ -12,7 +12,9 @@ const CID_DATA_TYPE = {
 
     INCOMING: 'incoming',
 
-    MASKED: 'masked',
+    MASKED_PRIVATE: 'masked-private',
+    MASKED_PUBLIC: 'masked-public',
+    MASKED_UNAVAILABLE: 'masked-unavailable',
 
 
     DIAL_OUT: 'dial-out',

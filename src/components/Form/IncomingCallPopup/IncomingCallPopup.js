@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
  * CID 데이터 타입 구분 함수
  * --
  */
-const getMessageByType = (type, data) => {
+const getMessageByType = (type, data, reason) => {
     switch (type) {
         case CID_DATA_TYPE.DEVICE_INFO_RES:
             return {
@@ -56,6 +56,27 @@ const getMessageByType = (type, data) => {
                 content: '수화기 내려놓음',
                 button: false,
             };
+
+        case CID_DATA_TYPE.MASKED_PRIVATE:
+            return {
+                head: '발신정보표시금지',
+                content: `MASK 처리: ${reason}`,
+                button: false,
+            }
+
+        case CID_DATA_TYPE.MASKED_PUBLIC:
+            return {
+                head: '공중전화',
+                content: `MASK 처리: ${reason}`,
+                button: false,
+            }
+
+        case CID_DATA_TYPE.MASKED_UNAVAILABLE:
+            return {
+                head: '발신번호 수집불가',
+                content: `MASK 처리: ${reason}`,
+                button: false,
+            }
 
         default:
             return '알 수 없는 전화 상태';
